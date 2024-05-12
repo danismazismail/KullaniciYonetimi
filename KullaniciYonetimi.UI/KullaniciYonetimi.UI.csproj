@@ -64,6 +64,8 @@
     <Compile Include="DB\DTO\KullaniciDTO.cs" />
     <Compile Include="DB\DTO\KullaniciGirisiDTO.cs" />
     <Compile Include="DB\DTO\PersonelAddDTO.cs" />
+    <Compile Include="DB\DTO\PersonelDenemeAddDTO.cs" />
+    <Compile Include="DB\DTO\PersonelDenemeUpdateDTO.cs" />
     <Compile Include="DB\DTO\PersonelIletisimSelectDTO.cs" />
     <Compile Include="DB\DTO\PersonelIletisimTuruDTO.cs" />
     <Compile Include="DB\DTO\PersonelSelectDTO.cs" />

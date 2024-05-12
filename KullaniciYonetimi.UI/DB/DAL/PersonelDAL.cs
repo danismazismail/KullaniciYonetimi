@@ -67,7 +67,7 @@ namespace KullaniciYonetimi.UI.DB.DAL
         //    return sonuc;
         //}
 
-        public bool PersonelVePersonelIlestisimAdd(PersonelAddDTO personelAddDTO, Dictionary<PersonelIletisimTuruDTO, int> personelIletisimTuru)
+        public bool PersonelVePersonelIlestisimAdd(PersonelDenemeAddDTO personelDenemeAddDTO)
         {
             bool personelKaydiAlindiMi = false;
             using (TransactionScope tran = new TransactionScope())
@@ -78,16 +78,17 @@ namespace KullaniciYonetimi.UI.DB.DAL
                     Personel eklenenPersonel = db.Personel.Add(new Personel()
                     {
                         PersonelID = Guid.NewGuid(),
-                        AdSoyad = personelAddDTO.AdSoyad,
-                        KullaniciID = personelAddDTO.KullaniciID,
-                        TC = personelAddDTO.TC,
-                        AktifMi = personelAddDTO.AktifMi
+                        AdSoyad = personelDenemeAddDTO.AdSoyad,
+                        KullaniciID = personelDenemeAddDTO.KullaniciID,
+                        TC = personelDenemeAddDTO.TC,
+                        AktifMi = personelDenemeAddDTO.AktifMi
                     });
                     int row = db.SaveChanges();
+                    //System.Threading.Thread.Sleep(60000);
                     if (row <= 0)
                         throw new Exception("Bilinmeyen bir hata oluştu");
 
-                    foreach (var item in personelIletisimTuru)
+                    foreach (var item in personelDenemeAddDTO.PersonelIletisimTuruDTO)
                     {
                         db.PersonelIletisim.Add(new PersonelIletisim()
                         {
@@ -98,8 +99,8 @@ namespace KullaniciYonetimi.UI.DB.DAL
                         });
                         db.SaveChanges();
                     }
-                    tran.Complete();
                     personelKaydiAlindiMi = true;
+                    tran.Complete();
                 }
                 catch (Exception ex)
                 {
@@ -131,35 +132,94 @@ namespace KullaniciYonetimi.UI.DB.DAL
 
         public bool PersonelDel(PersonelSelectDTO personelSelectDTO)
         {
-            bool sonuc = false;
-            using (KullaniciYonetimiContext db = new KullaniciYonetimiContext())
+            //bool sonuc = false;
+            //using (KullaniciYonetimiContext db = new KullaniciYonetimiContext())
+            //{
+            //
+            //    var personelIletisim = db.PersonelIletisim.Where(a => a.PersonelID == personel.PersonelID).SingleOrDefault();
+            //    personel.AktifMi = false;
+            //    if (personelIletisim != null)
+            //        personelIletisim.AktifMi = false;
+            //    sonuc = db.SaveChanges() > 0;
+            //}
+            //return sonuc;
+
+            bool personelSilindiMi = false;
+            using (TransactionScope tran = new TransactionScope())
             {
-                var personel = db.Personel.Where(a => a.PersonelID == personelSelectDTO.PersonelID).SingleOrDefault();
-                db.PersonelIletisim.Where(a => a.PersonelID == personel.PersonelID).SingleOrDefault().AktifMi = false;
-                personel.AktifMi = false;
-                sonuc = db.SaveChanges() > 0;
+                try
+                {
+                    KullaniciYonetimiContext db = new KullaniciYonetimiContext();
+                    db.Personel.Where(a => a.PersonelID == personelSelectDTO.PersonelID).SingleOrDefault().AktifMi = false;
+                    int row = db.SaveChanges();
+                    if (row <= 0)
+                        throw new Exception("Bilinmeyen bir hata oluştu.");
+
+                    var personelIletisim = db.PersonelIletisim.Where(a => a.PersonelID == personelSelectDTO.PersonelID).ToList();
+                    foreach (var item in personelIletisim)
+                    {
+                        item.AktifMi = false;
+                        db.SaveChanges();
+                    }
+                    personelSilindiMi = true;
+                    tran.Complete();
+                }
+                catch (Exception ex)
+                {
+                    personelSilindiMi = false;
+                    tran.Dispose(); throw ex;
+                }
             }
-            return sonuc;
+            return personelSilindiMi;
         }
 
-        public void PersonelUpdate(PersonelSelectDTO personelSelectDTO, PersonelIletisimTuruDTO personelIletisimTuruDTO)
+        public bool PersonelUpdate(PersonelDenemeUpdateDTO personelDenemeUpdateDTO)
         {
-            using (KullaniciYonetimiContext db = new KullaniciYonetimiContext())
+            bool personelGuncellendiMi = false;
+            using (TransactionScope tran = new TransactionScope())
             {
-                var personel = db.Personel.Where(a => a.PersonelID == personelSelectDTO.PersonelID).Select(a => new Personel()
+                try
                 {
-                    PersonelID = personelSelectDTO.PersonelID,
-                    AdSoyad = personelSelectDTO.AdSoyad,
-                    AktifMi = personelSelectDTO.AktifMi,
-                    KullaniciID = personelSelectDTO.KullaniciID,
-                    TC = personelSelectDTO.TC,
-                }).SingleOrDefault();
+                    KullaniciYonetimiContext db = new KullaniciYonetimiContext();
 
-                //db.PersonelIletisim.Where(a => a.PersonelID == personel.PersonelID).Select(a=> new PersonelIletisim()
-                //{
-                      
-                //});
+                    var personel = db.Personel.Where(a => a.PersonelID == personelDenemeUpdateDTO.PersonelSelect.PersonelID).SingleOrDefault();
+                    if (personel.PersonelID == personelDenemeUpdateDTO.PersonelSelect.PersonelID)
+                    {
+                        personel.KullaniciID = personelDenemeUpdateDTO.PersonelSelect.KullaniciID;
+                        personel.AktifMi = true;
+                        personel.AdSoyad = personelDenemeUpdateDTO.PersonelSelect.AdSoyad;
+                        personel.TC = personelDenemeUpdateDTO.PersonelSelect.TC;
+                    }
+                    int row = db.SaveChanges();
+                    if (row <= 0)
+                        throw new Exception("Bilinmeyen bir hata oluştu.");
+
+                    var list = db.PersonelIletisim.Where(a => a.PersonelID == personelDenemeUpdateDTO.PersonelSelect.PersonelID).ToList();
+                    foreach (var item in list)
+                    {
+                        item.AktifMi = false;
+                    }
+                    foreach (var item in personelDenemeUpdateDTO.PersonelIletisimTuru)
+                    {
+                        db.PersonelIletisim.Add(new PersonelIletisim()
+                        {
+                            PersonelID = personelDenemeUpdateDTO.PersonelSelect.PersonelID,
+                            IletisimTuruID = item.Value,
+                            Bilgi = item.Key.ToString(),
+                            AktifMi = true,
+                        });
+                        db.SaveChanges();
+                    }
+                    personelGuncellendiMi = true;
+                    tran.Complete();
+                }
+                catch (Exception)
+                {
+                    tran.Dispose();
+                    personelGuncellendiMi = false;
+                }
             }
+            return personelGuncellendiMi;
         }
     }
 }

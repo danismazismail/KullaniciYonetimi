@@ -34,10 +34,10 @@ namespace KullaniciYonetimi.UI
         private void btnGiris_Click(object sender, EventArgs e)
         {
             string kullaniciRolu = "";
-            if (!string.IsNullOrWhiteSpace(txtMail.Text) && !string.IsNullOrWhiteSpace(txtSifre.Text))
+            if (!string.IsNullOrWhiteSpace(txtMail.Text) && !string.IsNullOrWhiteSpace(txtSifre.Text) && txtMail.Text.Contains("@"))
             {
                 KullaniciGirisiDTO kullaniciGirisiDTO = new KullaniciGirisiDTO();
-                kullaniciGirisiDTO.KullaniciMail = txtMail.Text;
+                kullaniciGirisiDTO.KullaniciMail = txtMail.Text.ToLower();
                 kullaniciGirisiDTO.KullaniciSifre = txtSifre.Text;
 
                 KullaniciDAL kullaniciDAL = new KullaniciDAL();

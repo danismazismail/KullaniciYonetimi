@@ -8,7 +8,8 @@ namespace KullaniciYonetimi.UI.DB.DTO
 {
     public class PersonelIletisimTuruDTO
     {
-        public string Mail { get; set; }
+        public string _mail;
+        public string Mail { get { return _mail; } set { _mail = value.ToLower(); } }
         public string Tel { get; set; }
         public string Adres { get; set; }
 

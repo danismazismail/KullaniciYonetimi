@@ -37,34 +37,53 @@ namespace KullaniciYonetimi.UI
 
         private void btnMailEkle_Click(object sender, EventArgs e)
         {
-            lblPersonelMailAdedi.Visible = true;
-            lblPersonelMailAdedi.Text = (Convert.ToInt32(lblPersonelMailAdedi.Text) + 1).ToString();
-            PersonelIletisimTuruDTO personelIletisimTuruDTO = new PersonelIletisimTuruDTO();
-            personelIletisimTuruDTO.Mail = txtMail.Text;
-            personelIletisimTuru.Add(personelIletisimTuruDTO, 2);
-            txtMail.Text = string.Empty;
+            if (!string.IsNullOrWhiteSpace(txtMail.Text) && txtMail.Text.Contains("@"))
+            {
+                lblPersonelMailAdedi.Visible = true;
+                lblPersonelMailAdedi.Text = (Convert.ToInt32(lblPersonelMailAdedi.Text) + 1).ToString();
+                PersonelIletisimTuruDTO personelIletisimTuruDTO = new PersonelIletisimTuruDTO();
+                personelIletisimTuruDTO.Mail = txtMail.Text;
+                personelIletisimTuru.Add(personelIletisimTuruDTO, 2);
+                txtMail.Text = string.Empty;
+            }
+            else
+            {
+                MessageBox.Show("Mail alanını eksiksiz doldurunuz.");
+            }
         }
 
         private void btnTelEkle_Click(object sender, EventArgs e)
         {
-            lblPersonelTelAdedi.Visible = true;
-            lblPersonelTelAdedi.Text = (Convert.ToInt32(lblPersonelTelAdedi.Text) + 1).ToString();
-
-            PersonelIletisimTuruDTO personelIletisimTuruDTO = new PersonelIletisimTuruDTO();
-            personelIletisimTuruDTO.Tel = mstTel.Text;
-            personelIletisimTuru.Add(personelIletisimTuruDTO, 1);
-            mstTel.Text = string.Empty;
+            if (!string.IsNullOrWhiteSpace(mstTel.Text))
+            {
+                lblPersonelTelAdedi.Visible = true;
+                lblPersonelTelAdedi.Text = (Convert.ToInt32(lblPersonelTelAdedi.Text) + 1).ToString();
+                PersonelIletisimTuruDTO personelIletisimTuruDTO = new PersonelIletisimTuruDTO();
+                personelIletisimTuruDTO.Tel = mstTel.Text;
+                personelIletisimTuru.Add(personelIletisimTuruDTO, 1);
+                mstTel.Text = string.Empty;
+            }
+            else
+            {
+                MessageBox.Show("Telefon alanını eksiksiz doldurunuz.");
+            }
         }
 
         private void btnAdresEkle_Click(object sender, EventArgs e)
         {
-            lblPersonelAdresAdedi.Visible = true;
-            lblPersonelAdresAdedi.Text = (Convert.ToInt32(lblPersonelAdresAdedi.Text) + 1).ToString();
-
-            PersonelIletisimTuruDTO personelIletisimTuruDTO = new PersonelIletisimTuruDTO();
-            personelIletisimTuruDTO.Adres = txtAdres.Text;
-            personelIletisimTuru.Add(personelIletisimTuruDTO, 3);
-            txtAdres.Text = string.Empty;
+            if (!string.IsNullOrWhiteSpace(txtAdres.Text))
+            {
+                lblPersonelAdresAdedi.Visible = true;
+                lblPersonelAdresAdedi.Text = (Convert.ToInt32(lblPersonelAdresAdedi.Text) + 1).ToString();
+                PersonelIletisimTuruDTO personelIletisimTuruDTO = new PersonelIletisimTuruDTO();
+                personelIletisimTuruDTO.Adres = txtAdres.Text;
+                personelIletisimTuru.Add(personelIletisimTuruDTO, 3);
+                txtAdres.Text = string.Empty;
+            }
+            else
+            {
+                MessageBox.Show("Adres alanını eksiksiz doldurunuz.");
+            }
         }
 
         private void btnCikis_Click(object sender, EventArgs e)
@@ -122,16 +141,29 @@ namespace KullaniciYonetimi.UI
 
             //ForeingKey'den kaynaklı once personel kayıt olacak onun ıdsini alıp personel iletişime oyle kayıt yapılacak
 
-            PersonelAddDTO personelAddDTO = new PersonelAddDTO();
-            personelAddDTO.AdSoyad = txtAdSoyad.Text;
-            personelAddDTO.TC = mstTc.Text;
-            personelAddDTO.KullaniciID = kullanici.KullaniciID;
-            PersonelDAL personelDAL = new PersonelDAL();
-            var sonuc = personelDAL.PersonelVePersonelIlestisimAdd(personelAddDTO, personelIletisimTuru);
-            if (sonuc)
-                MessageBox.Show("Personel Başarı ile Eklenmştir.");
+            if (!string.IsNullOrWhiteSpace(txtAdSoyad.Text) && !string.IsNullOrWhiteSpace(mstTc.Text) && personelIletisimTuru.Count > 0)
+            {
+                PersonelDenemeAddDTO personelDenemeAddDTO = new PersonelDenemeAddDTO();
+                personelDenemeAddDTO.AdSoyad = txtAdSoyad.Text;
+                personelDenemeAddDTO.TC = mstTc.Text;
+                personelDenemeAddDTO.KullaniciID = kullanici.KullaniciID;
+                personelDenemeAddDTO.PersonelIletisimTuruDTO = personelIletisimTuru;
+
+                //PersonelAddDTO personelAddDTO = new PersonelAddDTO();
+                //personelAddDTO.AdSoyad = txtAdSoyad.Text;
+                //personelAddDTO.TC = mstTc.Text;
+                //personelAddDTO.KullaniciID = kullanici.KullaniciID;
+                PersonelDAL personelDAL = new PersonelDAL();
+                var sonuc = personelDAL.PersonelVePersonelIlestisimAdd(personelDenemeAddDTO);
+                if (sonuc)
+                    MessageBox.Show($"{personelDenemeAddDTO.AdSoyad} Personel Listesine Başarı ile Eklenmştir.");
+                else
+                    MessageBox.Show("Bir hata oluştu tekrar deneyiniz.");
+            }
             else
-                MessageBox.Show("Bir hata oluştu tekrar deneyiniz.");
+            {
+                MessageBox.Show("Lütfen alanları eksiksiz doldurunuz.");
+            }
         }
 
         private PersonelSelectDTO personelSelectDTO = null;
@@ -198,14 +230,22 @@ namespace KullaniciYonetimi.UI
 
             //personel Tablosunda   adSoyad - Tc - KullanıcıID - AktifMi
             //PersonelIletisim Tablosuna  PersonelID -  IletisimTuruID  -  Bilgi  -  AktifMi
-            PersonelIletisimTuruDTO personelIletisimTuruDTO = new PersonelIletisimTuruDTO();
-            personelIletisimTuruDTO.Tel = mstTel.Text;
-            personelIletisimTuruDTO.Adres = txtAdres.Text;
-            personelIletisimTuruDTO.Mail = txtMail.Text;
+            //PersonelIletisimTuruDTO personelIletisimTuruDTO = new PersonelIletisimTuruDTO();
+            //personelIletisimTuruDTO.Tel = mstTel.Text;
+            //personelIletisimTuruDTO.Adres = txtAdres.Text;
+            //personelIletisimTuruDTO.Mail = txtMail.Text;
+            PersonelDenemeUpdateDTO personelDenemeUpdateDTO = new PersonelDenemeUpdateDTO();
+            personelDenemeUpdateDTO.PersonelSelect.PersonelID = personelSelectDTO.PersonelID;
+            personelDenemeUpdateDTO.PersonelSelect.AdSoyad = txtAdSoyad.Text;
+            personelDenemeUpdateDTO.PersonelSelect.TC = mstTc.Text;
+            personelDenemeUpdateDTO.PersonelIletisimTuru = personelIletisimTuru;
 
             PersonelDAL personelDAL = new PersonelDAL();
-            //personelDAL.PersonelDel(personelSelectDTO, personelIletisimTuruDTO);
-
+            var sonuc = personelDAL.PersonelUpdate(personelDenemeUpdateDTO);
+            if (sonuc)
+                MessageBox.Show($"{personelDenemeUpdateDTO.PersonelSelect.AdSoyad} İsimli personel güncellenmiştir.");
+            else
+                MessageBox.Show($"{personelDenemeUpdateDTO.PersonelSelect.AdSoyad} İsimli personel güncellenirken bir sorun oluştu tekrar deneyiniz.");
         }
 
         private void btnPersonelSil_Click(object sender, EventArgs e)
@@ -216,7 +256,7 @@ namespace KullaniciYonetimi.UI
 
             PersonelDAL personelDAL = new PersonelDAL();
             bool sonuc = personelDAL.PersonelDel(personelSelectDTO);
-            MessageBox.Show(sonuc ? "Personel başarı ile silinmiştir." : "Bir hata oluştu tekrar deneyiniz.");
+            MessageBox.Show(sonuc ? $"{personelSelectDTO.AdSoyad} İsimli personel listeden başarı ile silinmiştir." : "Bir hata oluştu tekrar deneyiniz.");
         }
     }
 }
