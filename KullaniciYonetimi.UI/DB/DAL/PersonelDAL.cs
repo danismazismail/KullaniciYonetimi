@@ -75,32 +75,36 @@ namespace KullaniciYonetimi.UI.DB.DAL
                 try
                 {
                     KullaniciYonetimiContext db = new KullaniciYonetimiContext();
-                    Personel eklenenPersonel = db.Personel.Add(new Personel()
+                    var personel = db.Personel.Where(a => a.AdSoyad == personelDenemeAddDTO.AdSoyad && a.TC == personelDenemeAddDTO.TC).SingleOrDefault();
+                    if (personel == null)
                     {
-                        PersonelID = Guid.NewGuid(),
-                        AdSoyad = personelDenemeAddDTO.AdSoyad,
-                        KullaniciID = personelDenemeAddDTO.KullaniciID,
-                        TC = personelDenemeAddDTO.TC,
-                        AktifMi = personelDenemeAddDTO.AktifMi
-                    });
-                    int row = db.SaveChanges();
-                    //System.Threading.Thread.Sleep(60000);
-                    if (row <= 0)
-                        throw new Exception("Bilinmeyen bir hata oluştu");
-
-                    foreach (var item in personelDenemeAddDTO.PersonelIletisimTuruDTO)
-                    {
-                        db.PersonelIletisim.Add(new PersonelIletisim()
+                        Personel eklenenPersonel = db.Personel.Add(new Personel()
                         {
-                            PersonelID = eklenenPersonel.PersonelID,
-                            IletisimTuruID = item.Value,
-                            Bilgi = item.Key.ToString(),
-                            AktifMi = true
+                            PersonelID = Guid.NewGuid(),
+                            AdSoyad = personelDenemeAddDTO.AdSoyad,
+                            KullaniciID = personelDenemeAddDTO.KullaniciID,
+                            TC = personelDenemeAddDTO.TC,
+                            AktifMi = personelDenemeAddDTO.AktifMi
                         });
-                        db.SaveChanges();
+                        int row = db.SaveChanges();
+                        //System.Threading.Thread.Sleep(60000);
+                        if (row <= 0)
+                            throw new Exception("Bilinmeyen bir hata oluştu");
+
+                        foreach (var item in personelDenemeAddDTO.PersonelIletisimTuruDTO)
+                        {
+                            db.PersonelIletisim.Add(new PersonelIletisim()
+                            {
+                                PersonelID = eklenenPersonel.PersonelID,
+                                IletisimTuruID = item.Value,
+                                Bilgi = item.Key.ToString(),
+                                AktifMi = true
+                            });
+                            db.SaveChanges();
+                        }
+                        personelKaydiAlindiMi = true;
+                        tran.Complete();
                     }
-                    personelKaydiAlindiMi = true;
-                    tran.Complete();
                 }
                 catch (Exception ex)
                 {
@@ -191,7 +195,7 @@ namespace KullaniciYonetimi.UI.DB.DAL
                         personel.TC = personelDenemeUpdateDTO.PersonelSelect.TC;
                     }
                     int row = db.SaveChanges();
-                    if (row <= 0)
+                    if (row == 0)
                         throw new Exception("Bilinmeyen bir hata oluştu.");
 
                     var list = db.PersonelIletisim.Where(a => a.PersonelID == personelDenemeUpdateDTO.PersonelSelect.PersonelID).ToList();

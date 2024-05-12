@@ -135,6 +135,10 @@ namespace KullaniciYonetimi.UI
 
         private void btnPersonelEkle_Click(object sender, EventArgs e)
         {
+            btnMailEkle_Click(sender, e);
+            btnTelEkle_Click(sender, e);
+            btnAdresEkle_Click(sender, e);
+
             //personel Tablosuna   adSoyad-Tc-KullanıcıID-AktifMi
 
             //PersonelIletisim Tablosuna  PersonelID -  IletisimTuruID  -  Bilgi  -  AktifMi
@@ -164,6 +168,8 @@ namespace KullaniciYonetimi.UI
             {
                 MessageBox.Show("Lütfen alanları eksiksiz doldurunuz.");
             }
+            lstPersonelListesi.Items.Clear();
+            btnPersonelAra_Click(sender, e);
         }
 
         private PersonelSelectDTO personelSelectDTO = null;
@@ -234,8 +240,12 @@ namespace KullaniciYonetimi.UI
             //personelIletisimTuruDTO.Tel = mstTel.Text;
             //personelIletisimTuruDTO.Adres = txtAdres.Text;
             //personelIletisimTuruDTO.Mail = txtMail.Text;
+            btnMailEkle_Click(sender, e);
+            btnTelEkle_Click(sender, e);
+            btnAdresEkle_Click(sender, e);
             PersonelDenemeUpdateDTO personelDenemeUpdateDTO = new PersonelDenemeUpdateDTO();
-            personelDenemeUpdateDTO.PersonelSelect.PersonelID = personelSelectDTO.PersonelID;
+            personelDenemeUpdateDTO.PersonelSelect = personelSelectDTO;
+            personelDenemeUpdateDTO.PersonelSelect.KullaniciID = personelSelectDTO.KullaniciID;
             personelDenemeUpdateDTO.PersonelSelect.AdSoyad = txtAdSoyad.Text;
             personelDenemeUpdateDTO.PersonelSelect.TC = mstTc.Text;
             personelDenemeUpdateDTO.PersonelIletisimTuru = personelIletisimTuru;
@@ -246,6 +256,9 @@ namespace KullaniciYonetimi.UI
                 MessageBox.Show($"{personelDenemeUpdateDTO.PersonelSelect.AdSoyad} İsimli personel güncellenmiştir.");
             else
                 MessageBox.Show($"{personelDenemeUpdateDTO.PersonelSelect.AdSoyad} İsimli personel güncellenirken bir sorun oluştu tekrar deneyiniz.");
+
+            lstPersonelListesi.Items.Clear();
+            btnPersonelAra_Click(sender, e);
         }
 
         private void btnPersonelSil_Click(object sender, EventArgs e)
@@ -257,6 +270,9 @@ namespace KullaniciYonetimi.UI
             PersonelDAL personelDAL = new PersonelDAL();
             bool sonuc = personelDAL.PersonelDel(personelSelectDTO);
             MessageBox.Show(sonuc ? $"{personelSelectDTO.AdSoyad} İsimli personel listeden başarı ile silinmiştir." : "Bir hata oluştu tekrar deneyiniz.");
+
+            lstPersonelListesi.Items.Clear();
+            btnPersonelAra_Click(sender, e);
         }
     }
 }
